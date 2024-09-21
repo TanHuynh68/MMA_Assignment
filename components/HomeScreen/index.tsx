@@ -1,5 +1,5 @@
 import { ArtTool, Brand } from "@/models";
-import { getAllArtTool, getAllBrandName } from "@/services";
+import { getAllArtTool, getAllBrandName, updateStatusArtTool } from "@/services";
 import { useEffect, useState } from "react";
 import { Button, FlatList, Image, StyleSheet, Text, View } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -24,6 +24,20 @@ const HomeScreen = () => {
             setBrand(res);
         }
     }
+
+    const setStatus = async (id: string) => {
+        console.log("pressed");
+        const currentItem = artTool.find(item => item.id === id);
+        if (currentItem) {
+            const newStatus = !currentItem.status;
+            try {
+                const updatedItem = await updateStatusArtTool(id, newStatus);
+                setArtTool(artTool.filter(item => item.id === id ? { ...item, status: updatedItem.status } : item));
+            } catch (error) {
+                console.error("Error updating status: ", error);
+            }
+        }
+    };
 
     return (
         <View>
@@ -64,15 +78,14 @@ const HomeScreen = () => {
                                         <View>
                                             {
                                                 item.status === true ?
-                                                    <AntDesign name="heart" size={24} color="black" />
+                                                    <AntDesign onPress={()=>setStatus(item.id)} name="heart" size={24} color="black" />
                                                     :
-                                                    <AntDesign name="hearto" size={24} color="black" />
+                                                    <AntDesign onPress={()=>setStatus(item.id)} name="hearto" size={24} color="black" />
                                             }
                                         </View>
                                     </Text>
                                 </View>
                             </View>
-
                         )
                     }}
                 />
