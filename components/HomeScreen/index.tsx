@@ -4,18 +4,22 @@ import { useEffect, useState } from "react";
 import { Button, FlatList, Image, StyleSheet, Text, View } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
 const HomeScreen = () => {
-    const [artTool, setArtTool] = useState<ArtTool[]>([])
-    const [brand, setBrand] = useState<Brand[]>([])
+    const [artTool, setArtTool] = useState<ArtTool[]>([]);
+    const [brand, setBrand] = useState<Brand[]>([]);
+    const [loading, setLoading] = useState(true);
+    
     useEffect(() => {
         getAllArtToolFromHome();
         getAllBrandNameFromHome();
     }, [])
 
     const getAllArtToolFromHome = async () => {
+        setLoading(true)
         const res = await getAllArtTool();
         if (res) {
             setArtTool(res)
         }
+        setLoading(false)
     }
 
     const getAllBrandNameFromHome = async () => {
@@ -33,11 +37,24 @@ const HomeScreen = () => {
             try {
                 const updatedItem = await updateStatusArtTool(id, newStatus);
                 setArtTool(artTool.filter(item => item.id === id ? { ...item, status: updatedItem.status } : item));
+                getAllArtToolFromHome();
             } catch (error) {
                 console.error("Error updating status: ", error);
             }
         }
     };
+
+    if (loading) {
+        return (
+            <View style={{
+                alignItems: "center",
+                justifyContent: "center",
+                flex: 1
+            }}>
+                <Text>Loading ...</Text>
+            </View>
+        )
+    }
 
     return (
         <View>
@@ -49,7 +66,7 @@ const HomeScreen = () => {
                     renderItem={({ item }) => {
                         return (
                             <View style={styles.brandRow}>
-                                <Button  title={item.name}></Button>
+                                <Button title={item.name}></Button>
                             </View>
                         )
                     }}
@@ -64,23 +81,23 @@ const HomeScreen = () => {
                     renderItem={({ item }) => {
                         return (
                             <View style={styles.row}>
-                                <Text style={styles.name}>
-                                    Name: {item.name}
-                                </Text>
                                 <Image
                                     resizeMode="cover"
                                     style={{ width: 160, height: 100 }}
                                     source={{ uri: item?.image }}
                                 />
+                                <Text style={styles.name}>
+                                   {item.name}
+                                </Text>
                                 <View style={{ flex: 1, justifyContent: "space-between" }}>
                                     <Text>
                                         {item.price * item.discount / 100}$ {item.price} {item.discount} %
                                         <View>
                                             {
                                                 item.status === true ?
-                                                    <AntDesign onPress={()=>setStatus(item.id)} name="heart" size={24} color="black" />
+                                                    <AntDesign onPress={() => setStatus(item.id)} name="heart" size={24} color="black" />
                                                     :
-                                                    <AntDesign onPress={()=>setStatus(item.id)} name="hearto" size={24} color="black" />
+                                                    <AntDesign onPress={() => setStatus(item.id)} name="hearto" size={24} color="black" />
                                             }
                                         </View>
                                     </Text>
@@ -104,10 +121,12 @@ const styles = StyleSheet.create({
         borderColor: "#ccc",
         borderWidth: 1,
         padding: 15,
-        margin: 10
+        margin: 10,
+        backgroundColor: "white"
     },
     name: {
-        padding: 2
+        padding: 2,
+        fontWeight: "bold"
     },
     brandRow: {
         flex: 1,
