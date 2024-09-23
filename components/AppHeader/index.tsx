@@ -4,11 +4,11 @@ import { useNavigation } from "@react-navigation/native";
 const Header = () => {
     const navigation:any = useNavigation();
     return (
-        <View style={styles.container}>
+        <View  style={styles.container}>
             <MaterialIcons
             onPress={()=>navigation.openDrawer()}
             name="menu" size={24} color="black" />
-            <Text style={styles.headerText}>Art Tool Page</Text>
+            <Text  style={styles.headerText}>Art Tool Page</Text>
         </View>
     )
 }

@@ -1,32 +1,19 @@
-import { Image, StyleSheet, Platform, Text, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { StyleSheet} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Nav from '@/components/Navbar';
+import Root from '@/components/Root';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import DetailScreen from '@/components/Detail';
+const Stack = createNativeStackNavigator();
 
-
-export default function HomeScreen() {
+export default function App() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
-        <Nav/>
+      <Stack.Navigator>
+        <Stack.Screen name="Root"
+        options={{headerShown: false}}
+        component={Root} />
+        <Stack.Screen name="Detail" component={DetailScreen} />
+      </Stack.Navigator>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});

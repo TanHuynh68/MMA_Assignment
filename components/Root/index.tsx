@@ -4,7 +4,7 @@ import HomeScreen from '../HomeScreen';
 import AppHeader from '../AppHeader';
 import FavoritesListScreen from '../FavoritesListScreen';
 const Drawer = createDrawerNavigator();
-export default function Nav() {
+export default function Root() {
     return (
         <>
         <Drawer.Navigator initialRouteName="Home">

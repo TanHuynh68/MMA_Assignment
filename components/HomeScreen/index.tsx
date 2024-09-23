@@ -1,13 +1,13 @@
 import { ArtTool, Brand } from "@/models";
 import { getAllArtTool, getAllBrandName, updateStatusArtTool } from "@/services";
 import { useEffect, useState } from "react";
-import { Button, FlatList, Image, StyleSheet, Text, View } from "react-native";
+import { Button, FlatList, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
-const HomeScreen = () => {
+const HomeScreen = ({navigation}) => {
     const [artTool, setArtTool] = useState<ArtTool[]>([]);
     const [brand, setBrand] = useState<Brand[]>([]);
     const [loading, setLoading] = useState(true);
-    
+
     useEffect(() => {
         getAllArtToolFromHome();
         getAllBrandNameFromHome();
@@ -81,13 +81,17 @@ const HomeScreen = () => {
                     renderItem={({ item }) => {
                         return (
                             <View style={styles.row}>
-                                <Image
-                                    resizeMode="cover"
-                                    style={{ width: 160, height: 100 }}
-                                    source={{ uri: item?.image }}
-                                />
+                                <Pressable
+                                onPress={()=>navigation.navigate('Detail', {item: item})}
+                                >
+                                    <Image
+                                        resizeMode="cover"
+                                        style={{ width: 160, height: 100 }}
+                                        source={{ uri: item?.image }}
+                                    />
+                                </Pressable>
                                 <Text style={styles.name}>
-                                   {item.name}
+                                    {item.name}
                                 </Text>
                                 <View style={{ flex: 1, justifyContent: "space-between" }}>
                                     <Text>
