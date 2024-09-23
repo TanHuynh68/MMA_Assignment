@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '.';
 import FavoritesListScreen from '@/components/FavoritesListScreen';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Header from '@/components/AppHeader';
 export default function TabLayout() {
 
   return (
@@ -24,7 +25,8 @@ export default function TabLayout() {
          component={HomeScreen}
          />
       <Tab.Screen
-      options={{headerShown: false,
+      options={{
+        header:()=><Header page='favorite'/>,
         tabBarIcon:()=>{
           return(
             <>

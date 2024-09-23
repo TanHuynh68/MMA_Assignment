@@ -1,10 +1,17 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Button, Image, StyleSheet, Text, View } from "react-native";
 import { Rating } from '@rneui/themed';
+import { useEffect } from "react";
 const DetailScreen = ({ navigation, route }: any) => {
     const ratingCompleted = (rating: number) => {
         console.log('Rating is: ' + rating);
     };
-    const { item } = route.params;
+    const { item, page } = route.params;
+    useEffect(()=>{
+        console.log("Item data: ", item);
+    },[item])
+    if (!item) {
+        return <Text>No item data available.</Text>;
+    }
     return (
         <View style={styles.view}>
             <Image
@@ -22,6 +29,7 @@ const DetailScreen = ({ navigation, route }: any) => {
                 onFinishRating={ratingCompleted}
                 style={{ paddingVertical: 10,  flex: 1  }}
             />
+             <Button title="Go back" onPress={() => navigation.navigate(page === "favorite" ? "Favortite-List" : "Home")} />
         </View>
     );
 }

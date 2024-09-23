@@ -1,13 +1,16 @@
 import { ArtTool, Brand } from "@/models";
 import { getAllArtTool, getAllBrandName, updateStatusArtTool } from "@/services";
 import { useEffect, useState } from "react";
-import { Button, FlatList, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Button, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
-const HomeScreen = ({navigation}) => {
+import { useNavigation } from "@react-navigation/native";
+const HomeScreen = ({ }) => {
+    const navigation: any = useNavigation();
     const [artTool, setArtTool] = useState<ArtTool[]>([]);
     const [brand, setBrand] = useState<Brand[]>([]);
     const [loading, setLoading] = useState(true);
-
+    const [buttonColor, setButtonColor] = useState<string>('blue')
+    const [buttonSelected, setButtonSelected] = useState<boolean>(false);
     useEffect(() => {
         getAllArtToolFromHome();
         getAllBrandNameFromHome();
@@ -15,7 +18,7 @@ const HomeScreen = ({navigation}) => {
 
     const getAllArtToolFromHome = async () => {
         setLoading(true)
-        const res = await getAllArtTool();
+        const res= await getAllArtTool();
         if (res) {
             setArtTool(res)
         }
@@ -56,22 +59,33 @@ const HomeScreen = ({navigation}) => {
         )
     }
 
+    const filterBrand = async (brandId: string) =>{
+        setLoading(true)
+        const res = await getAllArtTool();
+        setArtTool(res.filter((item:ArtTool)=>item.brandId === brandId))
+        setLoading(false)
+    }
     return (
         <View>
             <View>
-                <FlatList
-                    numColumns={3}
-                    data={brand}
-                    keyExtractor={item => item.id + ""}
-                    renderItem={({ item }) => {
-                        return (
-                            <View style={styles.brandRow}>
-                                <Button title={item.name}></Button>
-                            </View>
-                        )
-                    }}
-                >
-                </FlatList>
+                <Button color={"red"} onPress={()=> getAllArtToolFromHome()} title="All"></Button>
+                <ScrollView >
+                    <FlatList
+                        horizontal={true}
+                        data={brand}
+                        keyExtractor={item => item.id + ""}
+                        renderItem={({ item }) => {
+                            return (
+                                <View style={styles.brandRow}>
+                                    <Button
+                                    onPress={()=>filterBrand(item.id)}
+                                    title={item.name}></Button>
+                                </View>
+                            )
+                        }}
+                    >
+                    </FlatList>
+                </ScrollView>
             </View>
             <View style={styles.renderList}>
                 <FlatList
@@ -82,7 +96,7 @@ const HomeScreen = ({navigation}) => {
                         return (
                             <View style={styles.row}>
                                 <Pressable
-                                onPress={()=>navigation.navigate('Detail', {item: item})}
+                                    onPress={() => navigation.navigate('Detail', { item: item, page: "home" })}
                                 >
                                     <Image
                                         resizeMode="cover"

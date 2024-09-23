@@ -7,16 +7,16 @@ const Drawer = createDrawerNavigator();
 export default function Root() {
     return (
         <>
-        <Drawer.Navigator initialRouteName="Home">
-            <Drawer.Screen name="Home" component={HomeScreen} options={{
-                title:"Trang chủ",
-                header:()=><AppHeader/>
-            }}/>
-            <Drawer.Screen name="FavoritesList" component={FavoritesListScreen} options={{
-                title:"Danh sách yêu thích",
-                header:()=><AppHeader/>
-            }}/>
-        </Drawer.Navigator>
+            <Drawer.Navigator initialRouteName="Home">
+                <Drawer.Screen name="Home" component={HomeScreen} options={{
+                    title: "Trang chủ",
+                    header: () => <AppHeader />
+                }} />
+                <Drawer.Screen name="FavoritesList" component={FavoritesListScreen} options={{
+                    title: "Danh sách yêu thích",
+                    header: () => <AppHeader />
+                }} />
+            </Drawer.Navigator>
         </>
     );
 }
