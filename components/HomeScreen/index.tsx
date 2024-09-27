@@ -1,7 +1,7 @@
 import { ArtTool, Brand } from "@/models";
 import { getAllArtTool, getAllBrandName, updateStatusArtTool } from "@/services";
 import { useEffect, useState } from "react";
-import { Button, FlatList, Image, ImageBackground, Pressable, ScrollView, StyleSheet, Text, Touchable, TouchableOpacity, View } from "react-native";
+import { Button, FlatList, ImageBackground, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useNavigation } from "@react-navigation/native";
 import ButtonCustom from "../ButtonCustom";
@@ -12,12 +12,33 @@ const HomeScreen = ({ }) => {
     const [brand, setBrand] = useState<Brand[]>([]);
     const [loading, setLoading] = useState(true);
     const [buttonColorWithBrandId, setButtonColorWithBrandId] = useState<string>('');
-    const [brandItemCounts, setBrandItemCounts] = useState<{ [key: string]: number }>({});
+    const [countArtToolOfBrand, setCountArtToolOfBrand] = useState<number[]>([]);
 
     useEffect(() => {
         getAllArtToolFromHome();
         getAllBrandNameFromHome();
     }, []);
+
+    useEffect(() => {
+        if (brand.length > 0) {
+            getCountArtToolsForBrands();
+        }
+    }, [brand]);
+
+    const getCountArtToolsForBrands = async () => {
+        const promises = brand.map(async (element) => {
+            return await countItemOfBrand(element.id);
+        });
+
+        const counts = await Promise.all(promises);
+        setCountArtToolOfBrand(counts);
+    };
+
+    const countItemOfBrand = async (brandId: string): Promise<number> => {
+        const res = await getAllArtTool();
+        const countArtToolOfBrand = res.filter((item: ArtTool) => item.brandId === brandId);
+        return countArtToolOfBrand.length;
+    };
 
     const getAllArtToolFromHome = async () => {
         const res = await getAllArtTool();
@@ -26,19 +47,12 @@ const HomeScreen = ({ }) => {
         }
         setButtonColorWithBrandId('');
         setLoading(false);
-    }
+    };
 
     const getAllBrandNameFromHome = async () => {
         const res = await getAllBrandName();
         if (res) {
             setBrand(res);
-            const counts: { [key: string]: number } = {};
-            // Tính số lượng công cụ nghệ thuật của từng thương hiệu
-            for (const brand of res) {
-                const count = await countItemOfBrand(brand.id);
-                counts[brand.id] = count;
-            }
-            setBrandItemCounts(counts); // Lưu số lượng vào state
         }
     };
 
@@ -48,7 +62,7 @@ const HomeScreen = ({ }) => {
             const newStatus = !currentItem.status;
             try {
                 const updatedItem = await updateStatusArtTool(id, newStatus);
-                setArtTool(artTool.filter(item => item.id === id ? { ...item, status: updatedItem.status } : item));
+                setArtTool(artTool.map(item => item.id === id ? { ...item, status: updatedItem.status } : item));
                 getAllArtToolFromHome();
             } catch (error) {
                 console.error("Error updating status: ", error);
@@ -56,26 +70,20 @@ const HomeScreen = ({ }) => {
         }
     };
 
-    if (loading) {
-        return (
-            <View style={styles.loadingContainer}>
-                <Text>Loading ...</Text>
-            </View>
-        )
-    }
-
     const filterBrand = async (brandId: string) => {
         setLoading(true);
         const res = await getAllArtTool();
         setArtTool(res.filter((item: ArtTool) => item.brandId === brandId));
         setButtonColorWithBrandId(brandId);
         setLoading(false);
-    }
+    };
 
-    const countItemOfBrand = async (brandId: string): Promise<number> => {
-        const res = await getAllArtTool();
-        const brandFilter: ArtTool[] = res.filter((item: ArtTool) => item.brandId === brandId);
-        return brandFilter.length;
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <Text>Loading ...</Text>
+            </View>
+        );
     }
 
     return (
@@ -101,7 +109,7 @@ const HomeScreen = ({ }) => {
                                     <View style={styles.brandRow}>
                                         <ButtonCustom
                                             onPress={() => filterBrand(item.id)}
-                                            title={`${item.name} (${brandItemCounts[item.id] || 0})`}
+                                            title={`${item.name} (${countArtToolOfBrand[index] || 0})`}
                                             isSelected={item.id === buttonColorWithBrandId}
                                         />
                                     </View>
@@ -130,10 +138,11 @@ const HomeScreen = ({ }) => {
                                         <View style={styles.heartIconContainer}>
                                             <TouchableOpacity>
                                                 {
-                                                    item.status === true ?
+                                                    item.status === true ? (
                                                         <AntDesign onPress={() => setStatus(item.id)} name="heart" size={24} color="red" />
-                                                        :
+                                                    ) : (
                                                         <AntDesign onPress={() => setStatus(item.id)} name="hearto" size={24} color="red" />
+                                                    )
                                                 }
                                             </TouchableOpacity>
                                         </View>
@@ -150,8 +159,8 @@ const HomeScreen = ({ }) => {
                 />
             </View>
         </View>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     loadingContainer: {
