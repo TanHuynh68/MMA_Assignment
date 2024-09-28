@@ -7,6 +7,8 @@ import TabLayout from '../(tabs)/_layout';
 import FavoritesListScreen from '@/components/FavoritesListScreen';
 import HomeScreen from '@/components/HomeScreen';
 import Header from '@/components/AppHeader';
+import SearchScreen from '@/components/SearchScreen';
+import SearchScreenHeader from '@/components/SearchScreenHeader';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -16,6 +18,7 @@ export default function App() {
         <Stack.Screen options={{header:()=><Header page="home"/>}} name="Home" component={HomeScreen} />
         <Stack.Screen options={{header:()=><Header/>}} name="Detail" component={DetailScreen} />
         <Stack.Screen  name="Bottom-Tab" component={TabLayout} />
+        <Stack.Screen options={{headerShown:false}} name="SearchScreen" component={SearchScreen} />
         <Stack.Screen options={{header:()=><Header page='favorite'/>}} name="Favortite-List" component={FavoritesListScreen} />
       </Stack.Navigator>
     </SafeAreaView>
