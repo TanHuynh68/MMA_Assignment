@@ -21,7 +21,7 @@ export default function TabLayout() {
             )
           }
          }}
-        name="Home"
+        name="HomeTab"
          component={HomeScreen}
          />
       <Tab.Screen
