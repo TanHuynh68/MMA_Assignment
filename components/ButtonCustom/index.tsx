@@ -8,21 +8,25 @@ interface ButtonCustomProps {
 const ButtonCustom = ({ isSelected, title, onPress }: ButtonCustomProps) => {
     return (
         <Pressable
-            style={[styles.button, { backgroundColor: isSelected ? "yellow" : "#ccc" }]}
+            style={[styles.button,
+            {
+                backgroundColor: isSelected ? "white" : "#E8E8E8",
+                borderWidth: 1, borderColor: isSelected ? "red" : "#E8E8E8"
+            }]}
             onPress={onPress}
         >
-            <Text>{title}</Text>
+            <Text style={{ color: isSelected ? "red" : "black" }}>{title}</Text>
         </Pressable>
     )
 }
 
 const styles = StyleSheet.create({
-   button: {
-        paddingVertical: 10, // Khoảng cách trên dưới
-        paddingHorizontal: 20, // Khoảng cách trái phải
-        borderRadius: 20, // Bo tròn 4 góc, có thể tăng lên nếu muốn bo tròn nhiều hơn
-        alignItems: 'center', // Canh giữa theo chiều ngang
-        justifyContent: 'center', // Canh giữa theo chiều dọc
+    button: {
+        paddingVertical: 5,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 })
 

@@ -1,13 +1,13 @@
 import { ArtTool, Brand } from "@/models";
 import { getAllArtTool, getAllBrandName, updateStatusArtTool } from "@/services";
 import { useEffect, useState } from "react";
-import { Button, FlatList, ImageBackground, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, ImageBackground, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
-
+import Entypo from '@expo/vector-icons/Entypo';
 import ButtonCustom from "../ButtonCustom";
 import SearchBarComponent from "../SearchBar";
 import { useNavigation } from "@react-navigation/native";
-
+import { Rating, AirbnbRating } from 'react-native-ratings';
 const HomeScreen = ({ }) => {
     const navigation: any = useNavigation();
     const [artTool, setArtTool] = useState<ArtTool[]>([]);
@@ -49,6 +49,7 @@ const HomeScreen = ({ }) => {
         }
         setButtonColorWithBrandId('');
         setLoading(false);
+
     };
 
     const getAllBrandNameFromHome = async () => {
@@ -78,6 +79,7 @@ const HomeScreen = ({ }) => {
         setArtTool(res.filter((item: ArtTool) => item.brandId === brandId));
         setButtonColorWithBrandId(brandId);
         setLoading(false);
+        console.log("count", artTool.length)
     };
 
     if (loading) {
@@ -90,12 +92,13 @@ const HomeScreen = ({ }) => {
 
     return (
         <View style={{ backgroundColor: "white" }}>
-            <Pressable onPress={()=>navigation.navigate('SearchScreen')}>
+            <Pressable onPress={() => navigation.navigate('SearchScreen')}>
                 <SearchBarComponent />
             </Pressable>
             <View>
                 <ScrollView>
                     <FlatList
+                        style={{ paddingLeft: 10, paddingVertical: 8 }}
                         horizontal={true}
                         data={brand}
                         keyExtractor={item => item.id + ""}
@@ -114,7 +117,7 @@ const HomeScreen = ({ }) => {
                                     <View style={styles.brandRow}>
                                         <ButtonCustom
                                             onPress={() => filterBrand(item.id)}
-                                            title={`${item.name} (${countArtToolOfBrand[index] || 0})`}
+                                            title={`${item.name} (${countArtToolOfBrand[index]})`}
                                             isSelected={item.id === buttonColorWithBrandId}
                                         />
                                     </View>
@@ -124,6 +127,15 @@ const HomeScreen = ({ }) => {
                     />
                 </ScrollView>
             </View>
+            {
+                artTool.length === 0 &&
+                <View style={styles.nodataContainer}>
+                    <Entypo name="emoji-sad" size={48} color="black" />
+                    <Text
+                        style={{ paddingTop: 10 }}
+                    >The brand does not have any products</Text>
+                </View>
+            }
             <View style={styles.renderList}>
                 <FlatList
                     numColumns={2}
@@ -131,7 +143,7 @@ const HomeScreen = ({ }) => {
                     keyExtractor={item => item.id + ""}
                     renderItem={({ item }) => {
                         return (
-                            artTool.length > 0 ? <View style={styles.row}>
+                            <View style={styles.row}>
                                 <Pressable
                                     onPress={() => navigation.navigate('Detail', { item: item, page: "home" })}
                                 >
@@ -140,28 +152,36 @@ const HomeScreen = ({ }) => {
                                         style={styles.imageBackground}
                                         source={{ uri: item?.image }}
                                     >
-                                        <View style={styles.heartIconContainer}>
-                                            <TouchableOpacity>
-                                                {
-                                                    item.status === true ? (
-                                                        <AntDesign onPress={() => setStatus(item.id)} name="heart" size={24} color="red" />
-                                                    ) : (
-                                                        <AntDesign onPress={() => setStatus(item.id)} name="hearto" size={24} color="red" />
-                                                    )
-                                                }
-                                            </TouchableOpacity>
-                                        </View>
                                     </ImageBackground>
                                 </Pressable>
-                                <Text style={styles.name}>{item.name}</Text>
-                                <View style={{ flex: 1, justifyContent: "space-between" }}>
-                                    {/* <Text style={styles.originalPrice}>${item.price}</Text> */}
-                                    <Text style={styles.discountPrice}>${(item.price * item.discount / 100).toFixed(2)}</Text>
+                                <Text numberOfLines={2} style={styles.name}>{item.name}</Text>
+                                <View style={styles.heartIconContainer}>
+                                    <TouchableOpacity>
+                                        {
+                                            item.status === true ? (
+                                                <AntDesign onPress={() => setStatus(item.id)} name="heart" size={24} color="red" />
+                                            ) : (
+                                                <AntDesign onPress={() => setStatus(item.id)} name="hearto" size={24} color="red" />
+                                            )
+                                        }
+                                    </TouchableOpacity>
                                 </View>
-                            </View>
-                                : <View>
+                                <View style={{ flex: 1, justifyContent: "flex-end" }}>
+                                    <View style={{ flexDirection: "row", justifyContent: "flex-end", alignItems: "center" }}>
+                                        <View style={{ justifyContent: "center", alignItems: "center" }}>
+                                            <View>
+                                                <Text style={styles.discountPrice}>${(item.price - item.price * item.discount / 100).toFixed(2)}</Text>
+                                            </View>
+                                        </View>
+                                        <Text style={styles.originalPrice}>${item.price}</Text>
+                                        <View style={styles.discountPercentComponent}>
+                                            <Text style={styles.discountPercent}>-{item.discount}%</Text>
+                                        </View>
+                                    </View>
+                                </View>
 
-                                </View>
+                            </View>
+
                         );
                     }}
                 />
@@ -171,22 +191,30 @@ const HomeScreen = ({ }) => {
 };
 
 const styles = StyleSheet.create({
+    nodataContainer: {
+        height: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+        paddingBottom: 220
+    },
     loadingContainer: {
         alignItems: "center",
         justifyContent: "center",
         flex: 1
     },
     renderList: {
-        flexDirection: "row"
+        flexDirection: "row",
+        backgroundColor: "#F0F0F0"
     },
     row: {
         flex: 1,
         alignItems: "center",
         borderColor: "#ccc",
         borderWidth: 1,
-        padding: 15,
-        margin: 10,
-        backgroundColor: "white"
+        marginBottom: 5,
+        marginRight: 5,
+        backgroundColor: "white",
+        height: 320
     },
     name: {
         padding: 2,
@@ -194,25 +222,34 @@ const styles = StyleSheet.create({
     },
     brandRow: {
         flex: 1,
-        margin: 10,
+        margin: 3,
     },
     originalPrice: {
         padding: 10,
-        textDecorationLine: "line-through"
+        textDecorationLine: "line-through",
+    },
+    discountPercentComponent: {
+        padding: 0,
+        backgroundColor: "#ffebeb",
+        fontWeight: "bold",
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    discountPercent: {
+        color: "red",
+        fontSize: 12,
     },
     discountPrice: {
-        padding: 10,
-        backgroundColor: "#ffebeb",
         color: "red",
-        fontWeight: "bold"
+        fontSize: 16
     },
     heartIconContainer: {
-        position: "absolute",
-        left: 135
+        flex: 1,
+        justifyContent: "flex-end"
     },
     imageBackground: {
-        width: 160,
-        height: 100,
+        width: 190,
+        height: 190,
     }
 });
 
