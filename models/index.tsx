@@ -1,13 +1,28 @@
 export interface ArtTool {
-    id: string;         // ID của công cụ nghệ thuật
-    name: string;       // Tên của công cụ nghệ thuật
-    price: number;      // Giá của công cụ nghệ thuật
-    discount: number;   // Giá trị giảm giá
-    image: string;      // Đường dẫn hình ảnh của công cụ
-    status: boolean;    // Trạng thái (có thể là trạng thái còn hàng hoặc yêu thích)
-    brandName: string;  // Tên thương hiệu của công cụ nghệ thuật
-    brandId: string;    // ID của thương hiệu
-  }
+  id: string;
+  name: string;
+  price: number;
+  discount: number;
+  image: string;
+  status: boolean;
+  brandName: string;
+  brandId: string;
+  history: string[];  // Mảng từ khoá lịch sử
+  feedback: Feedback[];  // Mảng phản hồi
+}
+
+export interface Feedback {
+  id: string;
+  userName: string;
+  description: string;
+  image: Image[];  // Mảng hình ảnh của phản hồi
+  rating: number;
+  avatarUrl: string;
+}
+
+export interface Image {
+  url: string;  // Đường dẫn hình ảnh
+}
 
 export interface Brand{
   id: string,

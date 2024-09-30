@@ -49,7 +49,6 @@ const HomeScreen = ({ }) => {
         }
         setButtonColorWithBrandId('');
         setLoading(false);
-
     };
 
     const getAllBrandNameFromHome = async () => {

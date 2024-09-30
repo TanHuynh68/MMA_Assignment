@@ -25,7 +25,7 @@ const SearchScreen = () => {
 
                     placeholder="Search"
                    autoFocus={true}
-                    onBlur={() => Keyboard.dismiss()} // Ẩn bàn phím khi không còn focus
+                    onBlur={() => Keyboard.dismiss()}
                 />
                 {
                     searchInput != '' &&
