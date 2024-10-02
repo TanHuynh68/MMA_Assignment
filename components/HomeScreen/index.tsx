@@ -1,7 +1,7 @@
 import { ArtTool, Brand } from "@/models";
 import { getAllArtTool, getAllBrandName, updateStatusArtTool } from "@/services";
 import { useEffect, useState } from "react";
-import { FlatList, ImageBackground, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, ImageBackground, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View, VirtualizedList } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
 import ButtonCustom from "../ButtonCustom";
@@ -90,7 +90,7 @@ const HomeScreen = ({ }) => {
     }
 
     return (
-        <View style={{ backgroundColor: "white" }}>
+        <ScrollView style={{ backgroundColor: "white" }}>
             <Pressable onPress={() => navigation.navigate('SearchScreen')}>
                 <SearchBarComponent />
             </Pressable>
@@ -185,7 +185,7 @@ const HomeScreen = ({ }) => {
                     }}
                 />
             </View>
-        </View>
+        </ScrollView>
     );
 };
 
