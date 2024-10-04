@@ -70,6 +70,15 @@ const FavoritesListScreen = () => {
             }
         }
     };
+
+    const handleDeleteAllFromFavortesList = ()=>{
+       const res =  artToolChecked.map((item)=>{
+            setStatus(item)
+        })
+        console.log("res: ",  res)
+        getAllArtToolFromHome();
+    }
+
     const handleCheckAll = () => {
         console.log("checkbox: ", checkBox)
         if (checkBox === false) {
@@ -89,6 +98,8 @@ const FavoritesListScreen = () => {
             return "Delete " + artToolChecked.length + " item"
         }
     }
+    
+
     return (
         <View style={styles.container}>
             <Text style={styles.titleScreen}>
@@ -145,7 +156,7 @@ const FavoritesListScreen = () => {
                 <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                     {
                         artToolChecked.length >= 1 &&
-                        <Button title={renderDeleteText()}>
+                        <Button onPress={handleDeleteAllFromFavortesList} title={renderDeleteText()}>
                         </Button>
                     }
                 </View>

@@ -2,67 +2,99 @@ import { FlatList, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from
 import { useEffect, useState } from "react";
 import { useNavigation } from "expo-router";
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import { getAllKeyWordsOfHistory, newKeyword } from "@/services/search.service";
+import { SearchHistory } from "@/models";
+import LoadingComponent from "../loading";
 
 const SearchScreen = () => {
     const [searchInput, setSearchInput] = useState<string>('');
-    const navigation: any = useNavigation();
-    const [history, setHistory] = useState<SearchHistory[]>(searchHistory)
-    const handleDeleteInputSearch = () => {
-        setSearchInput('');
+    const [history, setHistory] = useState<SearchHistory[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [showHistory, setShowHistory] =  useState<boolean>(false);
+    useEffect(() => {
+        getAllHistoryFromSearchScreen();
+    }, []);
+
+    // Hàm lấy tất cả lịch sử tìm kiếm
+    const getAllHistoryFromSearchScreen = async () => {
+        setLoading(true);
+        const res = await getAllKeyWordsOfHistory();
+        if (res) {
+            setHistory(res);
+        }
+        setLoading(false);
+    };
+
+    // Hiển thị màn hình loading nếu đang tải
+    if (loading) {
+        return <LoadingComponent />;
     }
 
-    const handleInputFocus = () => {
-        console.log("TextInput được nhấn vào");
-    }
+    // Xử lý khi xóa từ khóa tìm kiếm
+    const handleDeleteInputSearch = () => {
+        setSearchInput('');
+        getAllHistoryFromSearchScreen();  // Cập nhật lại lịch sử sau khi xóa
+    };
+
+    // Xử lý khi nhập từ khóa tìm kiếm
+    const handleSetInput = async (keyword: string) => {
+        setSearchInput(keyword);
+        const findHistoryByKeyword = await getAllKeyWordsOfHistory(keyword);
+        setHistory(findHistoryByKeyword);
+    };
+
+    // Xử lý khi submit từ khóa tìm kiếm
+    const handleSubmitKeyword = async (event: any) => {
+        const keyword = event.nativeEvent.text;
+        console.log('Bạn đã tìm kiếm:', keyword);
+
+        const findKeyword = await getAllKeyWordsOfHistory(keyword);
+        if (findKeyword.length === 0) {
+            const res = await newKeyword(keyword, 0);
+            console.log("Từ khóa mới đã được thêm:", res);
+        }
+    };
 
     return (
         <View>
+            {/* Input tìm kiếm */}
             <View style={styles.containerSearch}>
                 <TextInput
+                    autoCapitalize="none"
+                    onChangeText={handleSetInput}
                     value={searchInput}
-                    onChangeText={setSearchInput}
                     style={styles.textInput}
-
                     placeholder="Search"
-                   autoFocus={true}
+                    autoFocus={true}
                     onBlur={() => Keyboard.dismiss()}
+                    onSubmitEditing={handleSubmitKeyword}  // Không cần truyền target
                 />
-                {
-                    searchInput != '' &&
+
+                {/* Hiển thị nút xóa nếu input không rỗng */}
+                {searchInput !== '' && (
                     <Pressable style={styles.iconContainer} onPress={handleDeleteInputSearch}>
-                        <View>
-                            <FontAwesome6 name="x" size={16} color="black" />
-                        </View>
+                        <FontAwesome6 name="x" size={16} color="black" />
                     </Pressable>
-                }
+                )}
             </View>
+
+            {/* Danh sách lịch sử tìm kiếm */}
             <FlatList
                 data={history}
-                keyExtractor={item => item.id + ""}
-                renderItem={({ item }) => {
-                    return (
-                        <Pressable
-                            onPress={() => setSearchInput(item.keyword)}
-                        >
-                            <View
-                                style={styles.containerSearchKeyWord}>
-                                <Text style={styles.text}>
-                                    {item.keyword}
-                                </Text>
-                            </View>
-                        </Pressable>
-                    )
-                }}
-            >
-
-            </FlatList>
-
+                keyExtractor={item => item.id.toString()}
+                renderItem={({ item }) => (
+                    <Pressable onPress={() => handleSetInput(item.keyword)}>
+                        <View style={styles.containerSearchKeyWord}>
+                            <Text style={styles.text}>{item.keyword}</Text>
+                        </View>
+                    </Pressable>
+                )}
+            />
         </View>
     );
-}
+};
 
 export default SearchScreen;
-
 
 const styles = StyleSheet.create({
     containerSearchKeyWord: {
@@ -72,7 +104,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
     },
     text: {
-        paddingVertical: 5
+        paddingVertical: 5,
     },
     containerSearch: {
         borderRadius: 10,
@@ -98,83 +130,3 @@ const styles = StyleSheet.create({
         height: "100%",
     },
 });
-
-interface SearchHistory {
-    id: number,
-    keyword: string,
-    brandName: string,
-    searchTime: string,
-    status: string,
-}
-const searchHistory = [
-    {
-        id: 1,
-        keyword: "Watercolor Brush",
-        brandName: "Winsor & Newton",
-        searchTime: "2024-09-28T10:45:00",
-        status: "found"
-    },
-    {
-        id: 2,
-        keyword: "Acrylic Paint Set",
-        brandName: "Liquitex",
-        searchTime: "2024-09-28T11:15:00",
-        status: "found"
-    },
-    {
-        id: 3,
-        keyword: "Graphite Pencils",
-        brandName: "Faber-Castell",
-        searchTime: "2024-09-28T11:30:00",
-        status: "not found"
-    },
-    {
-        id: 4,
-        keyword: "Oil Pastels",
-        brandName: "Sennelier",
-        searchTime: "2024-09-28T12:00:00",
-        status: "found"
-    },
-    {
-        id: 5,
-        keyword: "Charcoal Sticks",
-        brandName: "General's",
-        searchTime: "2024-09-28T12:30:00",
-        status: "found"
-    },
-    {
-        id: 6,
-        keyword: "Canvas Pad",
-        brandName: "Strathmore",
-        searchTime: "2024-09-28T13:00:00",
-        status: "not found"
-    },
-    {
-        id: 7,
-        keyword: "Palette Knife",
-        brandName: "Artisan",
-        searchTime: "2024-09-28T13:15:00",
-        status: "found"
-    },
-    {
-        id: 8,
-        keyword: "Sketchbook",
-        brandName: "Moleskine",
-        searchTime: "2024-09-28T13:45:00",
-        status: "found"
-    },
-    {
-        id: 9,
-        keyword: "Calligraphy Pen",
-        brandName: "Pilot",
-        searchTime: "2024-09-28T14:00:00",
-        status: "found"
-    },
-    {
-        id: 10,
-        keyword: "Colored Pencils",
-        brandName: "Prismacolor",
-        searchTime: "2024-09-28T14:30:00",
-        status: "not found"
-    }
-];

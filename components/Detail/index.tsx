@@ -67,6 +67,11 @@ const DetailScreen = ({ navigation, route }: any) => {
                         {item.name}
                     </Text>
                     <Text style={{ paddingVertical: 10 }}>{item.brandName}</Text>
+                    <View>
+                        <Text>
+                            {item.description}
+                        </Text>
+                    </View>
                     <View style={{ flexDirection: "row", paddingVertical: 10 }}>
                         <Text style={styles.priceAfterDiscount}>
                             ${(item.price - item.price * item.discount / 100).toFixed(2)}

@@ -1,5 +1,5 @@
 import axiosInstance from "@/api/axiosIntance"
-
+import BrandData from "@/data/brand"
 
 export const getAllArtTool = async() => {
     try {
@@ -13,9 +13,9 @@ export const getAllArtTool = async() => {
     }
 }
 
-export const getAllBrandName = async() => {
+export const getAllBrandName = () => {
     try {
-        const res = await axiosInstance.get('/brand')
+        const res =  BrandData
         if (res) {
             return res
         }

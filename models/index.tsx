@@ -29,3 +29,9 @@ export interface Brand{
   name: string,
   artToolId: string
 }
+
+export interface SearchHistory {
+  id: number,
+  keyword: string,
+  searchCount: number
+}
