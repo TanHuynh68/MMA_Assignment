@@ -8,9 +8,9 @@ export const getAllKeyWordsOfHistory = async (keyword?: string) => {
             const filterBySearchCount = response.sort((a: SearchHistory, b: SearchHistory) => b.searchCount - a.searchCount)
             if (keyword) {
                 const filterByKeyword = filterBySearchCount.filter((item: SearchHistory) => item.keyword.includes(keyword))
-                return filterByKeyword.slice(0, 10)
+                return filterByKeyword
             }
-            return filterBySearchCount.slice(0, 10)
+            return filterBySearchCount
         }
     } catch (error) {
         console.log('getAllKeyWordsOfHistory-error: ', error)

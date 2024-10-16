@@ -1,16 +1,18 @@
-import { Button, FlatList, Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Button, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Rating } from '@rneui/themed';
 import { useEffect, useState } from "react";
 import { ArtTool, Feedback } from "@/models";
 import Entypo from '@expo/vector-icons/Entypo';
 import ButtonCustom from "../ButtonCustom";
 import { Avatar } from 'react-native-elements';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AntDesign } from "@expo/vector-icons";
 
 const DetailScreen = ({ navigation, route }: any) => {
     const [buttonColorWithIndex, setButtonColorWithIndex] = useState<string>('');
     const [ratingAverage, setRatingAverage] = useState<number>(0);
     const [dataFeedback, setDataFeedback] = useState<Feedback[]>([]);
-
+    const [favorites, setFavorites] = useState<ArtTool[]>([]);
     const ratingCompleted = (rating: number) => {
         console.log('Rating is: ' + rating);
     };
@@ -20,7 +22,10 @@ const DetailScreen = ({ navigation, route }: any) => {
     useEffect(() => {
         getAverageRatingFeedback();
         setDataFeedback(item.feedback);
+        loadFavoritesFromStorage()
     }, []);
+
+
 
     if (!item) {
         return <Text>No item data available.</Text>;
@@ -54,16 +59,82 @@ const DetailScreen = ({ navigation, route }: any) => {
         }
     };
 
+    useEffect(() => {
+        navigation.getParent()?.setOptions({
+            tabBarStyle: {
+                display: "none"
+            }
+        });
+        return () => navigation.getParent()?.setOptions({
+            tabBarStyle: undefined
+        });
+    }, [navigation]);
+
+    const loadFavoritesFromStorage = async () => {
+        try {
+            const storedFavorites = await AsyncStorage.getItem('favorites');
+            if (storedFavorites) {
+                try {
+                    const parsedFavorites = JSON.parse(storedFavorites);
+                    console.log("home: ", parsedFavorites);
+
+                    // Lọc bỏ các mục không hợp lệ
+                    const validFavorites = parsedFavorites.filter((item: ArtTool) => item != null);
+                    setFavorites(validFavorites);
+                } catch (parseError) {
+                    console.error("Error parsing favorites JSON: ", parseError);
+                }
+            } else {
+                setFavorites([]);
+                console.log("Home -No favorites found in AsyncStorage.");
+            }
+        } catch (error) {
+            console.error("Error loading favorites from AsyncStorage: ", error);
+        } 
+    };
+
+    const toggleFavorite = async (item: ArtTool) => {
+        // Check if the item is already in favorites
+        const updatedFavorites = favorites.find(fav => fav?.id === item.id)
+            ? favorites.filter(fav => fav?.id !== item.id) // Remove from favorites
+            : [...favorites, item]; // Add to favorites
+
+        try {
+            // Save updated favorites to AsyncStorage
+            console.log("updatedFavorites: ", updatedFavorites)
+            await AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+            // Update state
+            setFavorites(updatedFavorites);
+        } catch (error) {
+            console.error("Error updating favorites: ", error);
+        }
+    };
     return (
-        <ScrollView>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
+            <View style={styles.breadcrumb}>
+                <View style={{ flexDirection: "row" }}>
+                    {
+                        page === "home" ? <Text style={{ color: "#3498db" }} onPress={() => navigation.navigate('Home')}
+                        >
+                            Home
+                        </Text>
+                            :
+                            <Text
+                                style={{ color: "#3498db" }}
+                                onPress={() => navigation.navigate('Favorite-List')}
+                            >Favorite</Text>
+                    }
+                    <Text> / Detail</Text>
+                </View>
+            </View>
             <View style={styles.view}>
                 <Image
                     source={{ uri: item.image }}
                     style={styles.image}
                     resizeMode="contain"
                 />
-                <View style={{ flex: 1 }}>
-                    <Text numberOfLines={1}>
+                <View >
+                    <Text style={{ fontSize: 18, paddingTop: 10 }} numberOfLines={1}>
                         {item.name}
                     </Text>
                     <Text style={{ paddingVertical: 10 }}>{item.brandName}</Text>
@@ -77,6 +148,22 @@ const DetailScreen = ({ navigation, route }: any) => {
                             ${(item.price - item.price * item.discount / 100).toFixed(2)}
                         </Text>
                         <Text style={styles.priceOrigin}>${item.price}</Text>
+                        <View style={styles.discountPercentComponent}>
+                            <Text style={styles.discountPercent}>-{item.discount}%</Text>
+                        </View>
+                        <View >
+                            <TouchableOpacity
+                                style={{ paddingLeft: 10 }}
+                                onPress={() => toggleFavorite(item)}>
+                                {
+                                    favorites.find(fav => fav?.id === item.id) ? (
+                                        <AntDesign name="heart" size={24} color="red" />
+                                    ) : (
+                                        <AntDesign name="hearto" size={24} color="red" />
+                                    )
+                                }
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
                 <View style={styles.feedbackContainer}>
@@ -86,61 +173,63 @@ const DetailScreen = ({ navigation, route }: any) => {
                         </Text>
                     </View>
                     <View style={{ flex: 1 }}>
-                        <ScrollView
+                        {/* <ScrollView
                             style={{ borderBottomWidth: 1, borderColor: "#ccc", paddingBottom: 10 }}
-                        >
-                            <FlatList
-                                keyExtractor={item => item + ""}
-                                horizontal={true}
-                                data={rating}
-                                renderItem={({ item, index }) => {
-                                    return (
-                                        <>
-                                            {index === 0 && (
-                                                <>
-                                                    <View style={styles.buttonContainer}>
-                                                        <ButtonCustom
-                                                            isSelected={buttonColorWithIndex === "All"}
-                                                            title="All"
-                                                            onPress={() => handleSelectedRating("All")}
-                                                        />
-                                                    </View>
-                                                    <View style={styles.buttonContainer}>
-                                                        <ButtonCustom
-                                                            isSelected={buttonColorWithIndex === "Positive"}
-                                                            title="Positive"
-                                                            onPress={() => handleSelectedRating("Positive")}
-                                                        />
-                                                    </View>
-                                                    <View style={styles.buttonContainer}>
-                                                        <ButtonCustom
-                                                            isSelected={buttonColorWithIndex === "Negative"}
-                                                            title="Negative"
-                                                            onPress={() => handleSelectedRating("Negative")}
-                                                        />
-                                                    </View>
-                                                </>
-                                            )}
-                                            <View style={styles.buttonContainer}>
-                                                <ButtonCustom
-                                                    isSelected={buttonColorWithIndex === item.toString()}
-                                                    title={item.toString()}
-                                                    onPress={() => handleSelectedRating(item.toString())}
-                                                />
-                                            </View>
-                                        </>
-                                    );
-                                }}
-                            />
-                        </ScrollView>
+                        > */}
+                        <FlatList
+                            keyExtractor={item => item + ""}
+                            horizontal={true}
+                            data={rating}
+
+                            renderItem={({ item, index }) => {
+                                return (
+                                    <>
+                                        {index === 0 && (
+                                            <>
+                                                <View style={styles.buttonContainer}>
+                                                    <ButtonCustom
+                                                        isSelected={buttonColorWithIndex === "All"}
+                                                        title="All"
+                                                        onPress={() => handleSelectedRating("All")}
+                                                    />
+                                                </View>
+                                                <View style={styles.buttonContainer}>
+                                                    <ButtonCustom
+                                                        isSelected={buttonColorWithIndex === "Positive"}
+                                                        title="Positive"
+                                                        onPress={() => handleSelectedRating("Positive")}
+                                                    />
+                                                </View>
+                                                <View style={styles.buttonContainer}>
+                                                    <ButtonCustom
+                                                        isSelected={buttonColorWithIndex === "Negative"}
+                                                        title="Negative"
+                                                        onPress={() => handleSelectedRating("Negative")}
+                                                    />
+                                                </View>
+                                            </>
+                                        )}
+                                        <View style={styles.buttonContainer}>
+                                            <ButtonCustom
+                                                isSelected={buttonColorWithIndex === item.toString()}
+                                                title={item.toString()}
+                                                onPress={() => handleSelectedRating(item.toString())}
+                                            />
+                                        </View>
+                                    </>
+                                );
+                            }}
+                        />
+                        {/* </ScrollView> */}
                     </View>
                     <View style={{ flex: 1 }}>
                         {dataFeedback.length > 0 ? (
                             <FlatList
+                                scrollEnabled={false}
                                 data={dataFeedback}
                                 keyExtractor={item => item.id.toString()}
                                 renderItem={({ item }) => (
-                                    <View style={styles.userFeedback}>
+                                    <View style={dataFeedback.length < 2 ? { paddingBottom: 120 } : styles.userFeedback}>
                                         <View style={{ flexDirection: "row" }}>
                                             <Avatar
                                                 rounded
@@ -178,6 +267,23 @@ const DetailScreen = ({ navigation, route }: any) => {
 };
 
 const styles = StyleSheet.create({
+    discountPercentComponent: {
+        padding: 0,
+        paddingLeft: 10,
+        paddingTop: 10,
+        fontWeight: "bold",
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    discountPercent: {
+        color: "red",
+        fontSize: 12,
+    },
+    breadcrumb: {
+        paddingVertical: 10,
+        paddingHorizontal: 25,
+        backgroundColor: "white"
+    },
     userFeedback: {
         flex: 1,
         marginTop: 15,
@@ -201,7 +307,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     feedbackContainer: {
-        flex: 1,
+
     },
     priceAfterDiscount: {
         fontSize: 28,
@@ -221,12 +327,12 @@ const styles = StyleSheet.create({
         height: 300,
     },
     view: {
-        flex: 1,
+
         paddingHorizontal: 25,
         backgroundColor: "white",
     },
     noDataContainer: {
-        flex: 1,
+        paddingVertical: 120,
         justifyContent: "center",
         alignItems: "center",
         height: "100%"

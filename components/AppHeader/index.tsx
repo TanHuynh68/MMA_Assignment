@@ -1,12 +1,19 @@
 import { StyleSheet, Text, View } from "react-native";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useNavigation } from "@react-navigation/native";
+
 interface HeaderProps {
     page?: string;
+    page2?: string;
 }
 
-const Header = ({page}: HeaderProps) => {
-    const navigation: any = useNavigation();
+const Header = ({ page, page2 }: HeaderProps) => {
+    const navigation = useNavigation();
+
+    // const backToScreen = () => {
+    //     navigation.navigate("Favorite-List"); // Đổi tên này thành tên route thực tế của bạn cho màn hình yêu thích
+    //     console.log("clicked");
+    // }
+
     if (page === "home") {
         return (
             <View style={styles.container}>
@@ -23,16 +30,16 @@ const Header = ({page}: HeaderProps) => {
                 </Text>
             </View>
         )
-    } else {
+    } else { // Trang chi tiết
         return (
             <View style={styles.container}>
+
                 <Text style={styles.headerText}>
                     Detail Page
                 </Text>
             </View>
         )
     }
-
 }
 
 const styles = StyleSheet.create({
@@ -49,4 +56,5 @@ const styles = StyleSheet.create({
         fontWeight: "bold"
     }
 })
+
 export default Header;
